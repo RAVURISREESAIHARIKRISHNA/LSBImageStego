@@ -22,13 +22,27 @@ public class LSBImageStego {
 
 
 //    OK TESTED
+
+    /**
+     *
+     * @param coverImage This is a Mat Object.
+     *                   DO NOT USE JPEG(because it uses Lossy Compression)
+     *                   USE PNG or BITMAP
+     *
+     * @description This sets the desired Parameters
+     */
     public LSBImageStego(Mat coverImage){
         this.coverImage = coverImage;
         this.coverImage_rows = (int)coverImage.size().height;
         this.coverImage_cols = (int)coverImage.size().width;
     }
 
-
+    /**
+     *
+     * @param coverImage This is a Mat Object
+     * @param originalMessageBinaryLength Included for Debugging Purposes
+     *@deprecated
+     */
     public LSBImageStego(Mat coverImage , int originalMessageBinaryLength){
         this.coverImage = coverImage;
         this.coverImage_rows = (int)coverImage.size().height;
@@ -37,6 +51,11 @@ public class LSBImageStego {
     }
 
 //    OK TESTED
+
+    /**
+     * @description This method adjusts the Binary string of the Message, such that it will
+     * have an even length.It adjusts and stores it as a member of the class.
+     */
     private void doAdjust(){
         this.originalMessageBinaryLength = this.binaryStringMessage.length();
         if(this.binaryStringMessage.length()%2!=0){
@@ -45,6 +64,17 @@ public class LSBImageStego {
     }
 
 //    OK TESTED
+
+    /**
+     *
+     * @param message This is the Secret Message which has to be encoded.
+     *                IT ACCEPTS ONLY ASCII CHARACTERS.DO NOT GIVE UNICODE!
+     *
+     * @return It returns a boolean value indicating the feasibility of encoding
+     * it using the given Cover Image
+     *
+     * @description This Method Has to be Called COMPULSORILY Before calling the method to Encode
+     */
     public boolean checkEncodePossibility(String message){
         this.binaryStringifyMessage(message);
         this.doAdjust();
@@ -56,6 +86,16 @@ public class LSBImageStego {
 
 
 //    OK TESTED
+
+    /**
+     *
+     * @param message This is the Secret Message String which has to be Encoded.
+     *                IT ACCEPTS ONLY ASCII CHARACTERS.DO NOT GIVE UNICODE!
+     *
+     * @description This method converts the message into equivalent binary string and
+     * stores it as a member of the class.This uses default ASCII codes and makes
+     * binary strings of each character of length 7
+     */
     private void binaryStringifyMessage(String message){
         StringBuilder binaryString = new StringBuilder();
 
@@ -75,12 +115,20 @@ public class LSBImageStego {
     }
 
 
-
+    /**
+     * Loading OpenCV
+     */
     static{
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
 //    OK TESTED
+
+    /**
+     *
+     * @param value This is normal Double value of Pixel Intensity
+     * @return It returns a binary String which is beautified(will have length 8 for Sure)
+     */
     private String getBeautifiedBinaryString(double value){
         String raw = Integer.toBinaryString((int)value);
         if(raw.length() < MAX_BINARY_PIXEL_INTENSITY_LENGTH){
@@ -92,6 +140,17 @@ public class LSBImageStego {
 
 
 //    OK TESTED
+
+    /**
+     *
+     * @param message This is the Secret Message which has to be encoded.
+     *                IT ACCEPTS ONLY ASCII CHARACTERS.DO NOT GIVE UNICODE!
+     * @return  Returns Mat Object of the Encoded Image.
+     *
+     * @description Call this Method to Encode Secret Message in the Cover Image.
+     *
+     * @dependency checkEncodePossibility(String message) HAS TO BE CALLED BEFORE CALLING THIS METHOD
+     */
     public Mat encodeImage(String message){
 
 //        Mat pic = this.coverImage.clone();
@@ -144,6 +203,11 @@ public class LSBImageStego {
 
 
 //    OK TESTED
+
+    /**
+     *
+     * @return It returns message as BinaryString from the Encoded Image
+     */
     private String getBinaryMessageFromImage(){
 
 
@@ -200,6 +264,9 @@ public class LSBImageStego {
 
     }
 
+    /**
+     * @deprecated This is used for Debugging Purpose.
+     */
     public void debug(){
         int i = 1;
         for(int rowCount = 0 ; rowCount <= this.coverImage_rows -1 ; rowCount++){
@@ -215,6 +282,13 @@ public class LSBImageStego {
 
     }
 
+    /**
+     *
+     * @param coverImage It takes the Encoded Image
+     * @return It returns String of the Secret Message
+     *
+     * @description Call this method to Decode the Encoded Image
+     */
     public String decodeImage(Mat coverImage){
         this.coverImage = coverImage;
         this.coverImage_rows = (int)coverImage.size().height;
@@ -242,9 +316,15 @@ public class LSBImageStego {
         return originalMessage;
     }
 
+    /**
+     *
+     * @param binary It takes BinaryString of the Secret Message
+     * @return  It returns the Secret Message String
+     */
     private String decodeMessageFromBinary(String binary){
 
         StringBuilder message = new StringBuilder();
+//        7 is the Length of the Binary String of any ASCII Character
         for(int i = 0 ; i<=binary.length()-7; i+=7 ){
             message.append((char) Integer.parseInt(binary.substring(i,i+7) ,2));
         }
