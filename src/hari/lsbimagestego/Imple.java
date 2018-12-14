@@ -11,7 +11,7 @@ public class Imple {
     public static void main(String[] args){
         Imgcodecs imageCodecs = new Imgcodecs();
 
-        Mat mat = imageCodecs.imread("C:\\Users\\HARI\\Desktop\\test.jpg");
+        Mat mat = imageCodecs.imread("C:\\Users\\HARI\\Desktop\\test.png");
 
         LSBImageStego obj = new LSBImageStego(mat);
         String message = "Hello World";
@@ -20,10 +20,13 @@ public class Imple {
         }else{
             System.out.println("NO");
         }
-//        obj.encodeImage(message);
-        imageCodecs.imwrite("C:\\Users\\HARI\\Desktop\\test_ENCODED.jpg" ,obj.encodeImage(message) );
+        Mat encodedImage = obj.encodeImage(message).clone();
+        imageCodecs.imwrite("C:\\Users\\HARI\\Desktop\\test_ENCODED.png" ,encodedImage );
 
-        Mat mat2 = imageCodecs.imread("C:\\Users\\HARI\\Desktop\\test_ENCODED.jpg");
+
+        Mat mat2 = imageCodecs.imread("C:\\Users\\HARI\\Desktop\\test_ENCODED.png");
+//        LSBImageStego obj2 = new LSBImageStego(mat2);
+//        obj.debug();
         obj.decodeImage(mat2);
 
     }
