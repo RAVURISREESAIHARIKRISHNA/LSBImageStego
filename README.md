@@ -2,7 +2,7 @@
 
 
 
-[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
+
 
 ```LSBImageStego``` is a Java Library for LSB Image Steganography using *OpenCV*.This replaces 2 bits from LSB of the pixel intensity value of single channel,with that of the Secret Message that has to be encoded.
 You can view the process as follows.
