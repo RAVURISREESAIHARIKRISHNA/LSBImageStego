@@ -14,9 +14,9 @@ public class Imple {
         Mat mat = imageCodecs.imread("C:\\Users\\HARI\\Desktop\\test.png");
 
         LSBImageStego obj = new LSBImageStego(mat);
-        String message = "Hello World";
+        String message = "flhfjdslghljsfkghkhj;ksfmb;lDSBJOGlsdkbn:>";
         if(obj.checkEncodePossibility(message)){
-            System.out.println("OK");
+            System.out.println("OK ENCODABLE");
         }else{
             System.out.println("NO");
         }

@@ -1,9 +1,6 @@
 package hari.lsbimagestego;
 
-//TODO:
-//TODO  1)Should store Length of the BinaryString_OF_Message in Image
-//TODo  2)Re-Calculate "Whether the Message can be Encoded or Not"
-//TODO  3)Make changes to Decoding Algorithm
+
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -41,7 +38,7 @@ public class LSBImageStego {
      *
      * @param coverImage This is a Mat Object
      * @param originalMessageBinaryLength Included for Debugging Purposes
-     *@deprecated
+     *@deprecated ******* !!! ONLY DEBUGGING !!! *************
      */
     public LSBImageStego(Mat coverImage , int originalMessageBinaryLength){
         this.coverImage = coverImage;
@@ -63,12 +60,63 @@ public class LSBImageStego {
         }
     }
 
+
+    /**
+     * @description This Encodes the Binary of the Original Message Length in the Image
+     */
+    private void encodeOriginalMessageBinaryLength(){
+        String binary_of_originalMessageBinaryLength = Integer.toBinaryString(this.originalMessageBinaryLength);
+        if(binary_of_originalMessageBinaryLength.length()%2 !=0){
+            binary_of_originalMessageBinaryLength = "0" + binary_of_originalMessageBinaryLength;
+        }
+        int remaining = binary_of_originalMessageBinaryLength.length();
+        String newLsbBits;
+        for(int col = this.coverImage_cols -1 ; col >=0 ; col--){
+            if(remaining > 0){
+                newLsbBits = binary_of_originalMessageBinaryLength.substring( remaining - NUMBER_OF_BITS_REPLACING , remaining );
+                remaining -= NUMBER_OF_BITS_REPLACING;
+//            System.out.println("ORIGINAL : "+this.getBeautifiedBinaryString(this.coverImage.get( this.coverImage_rows -1,col )[0]));
+
+            }else{
+                newLsbBits = String.join("", Collections.nCopies(NUMBER_OF_BITS_REPLACING, "0"));
+            }
+            String modifiedBinaryString = this.getBeautifiedBinaryString(this.coverImage.get( this.coverImage_rows -1,col )[0]).substring(0 , this.getBeautifiedBinaryString(this.coverImage.get( this.coverImage_rows -1,col )[0]).length() - NUMBER_OF_BITS_REPLACING) + newLsbBits;
+//            System.out.println("");
+            double[] data = new double[3];
+            data[0] = Integer.parseInt(modifiedBinaryString , 2);
+            data[1] = this.coverImage.get( this.coverImage_rows -1,col )[1];
+            data[2] = this.coverImage.get( this.coverImage_rows -1,col )[2];
+//                System.out.println("BEFORE : " + this.coverImage.get( this.coverImage_rows -1,col )[0]);
+            this.coverImage.put( this.coverImage_rows -1,col  , data);
+
+        }
+    }
+
+    /**
+     * @description This EXTRACTS the OriginalMessageBinaryLength from Image and sets the Property of the Mat Object
+     */
+    private void setOriginalMessageBinaryLength(){
+        StringBuilder sb = new StringBuilder();
+
+        for(int col = 0 ; col <= this.coverImage_cols - 1 ; col++){
+            sb.append(
+                    this.getBeautifiedBinaryString(
+                            this.coverImage.get(this.coverImage_rows -1 , col)[0]
+                    ).substring(
+                            this.getBeautifiedBinaryString(this.coverImage.get(this.coverImage_rows -1 , col)[0]).length() - NUMBER_OF_BITS_REPLACING  ,
+                            this.getBeautifiedBinaryString(this.coverImage.get(this.coverImage_rows -1 , col)[0]).length()
+                    )
+            );
+        }
+        this.originalMessageBinaryLength = Integer.parseInt(sb.toString() , 2);
+    }
+
 //    OK TESTED
 
     /**
      *
      * @param message This is the Secret Message which has to be encoded.
-     *                IT ACCEPTS ONLY ASCII CHARACTERS.DO NOT GIVE UNICODE!
+     *
      *
      * @return It returns a boolean value indicating the feasibility of encoding
      * it using the given Cover Image
@@ -78,7 +126,7 @@ public class LSBImageStego {
     public boolean checkEncodePossibility(String message){
         this.binaryStringifyMessage(message);
         this.doAdjust();
-        if(this.binaryStringMessage.length() > (this.coverImage_rows * this.coverImage_cols * NUMBER_OF_BITS_REPLACING)){
+        if(this.binaryStringMessage.length() > ((this.coverImage_rows - 1 )* this.coverImage_cols * NUMBER_OF_BITS_REPLACING)){
             return false;
         }
         return true;
@@ -90,7 +138,7 @@ public class LSBImageStego {
     /**
      *
      * @param message This is the Secret Message String which has to be Encoded.
-     *                IT ACCEPTS ONLY ASCII CHARACTERS.DO NOT GIVE UNICODE!
+     *
      *
      * @description This method converts the message into equivalent binary string and
      * stores it as a member of the class.This uses default ASCII codes and makes
@@ -144,7 +192,7 @@ public class LSBImageStego {
     /**
      *
      * @param message This is the Secret Message which has to be encoded.
-     *                IT ACCEPTS ONLY ASCII CHARACTERS.DO NOT GIVE UNICODE!
+     *
      * @return  Returns Mat Object of the Encoded Image.
      *
      * @description Call this Method to Encode Secret Message in the Cover Image.
@@ -168,6 +216,7 @@ public class LSBImageStego {
         System.out.println("Number of Rows : " + this.coverImage_rows);
         System.out.println("Number of Columns : " + this.coverImage_cols);
 
+        this.encodeOriginalMessageBinaryLength();
 
         int messageStringCounter = 0;
         for(int rowCount = 0 ; rowCount <= this.coverImage_rows -1 ; rowCount++){
@@ -293,6 +342,8 @@ public class LSBImageStego {
         this.coverImage = coverImage;
         this.coverImage_rows = (int)coverImage.size().height;
         this.coverImage_cols = (int)coverImage.size().width;
+
+        this.setOriginalMessageBinaryLength();
 
         String decodedBinaryMessage = this.getBinaryMessageFromImage();
 //        decodedBinaryMessage = "10010001100101110110011011001101111010000010101111101111111001011011001100100";
